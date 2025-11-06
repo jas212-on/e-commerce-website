@@ -1,7 +1,14 @@
-import React from "react";
+import React, { use } from "react";
 import {X, Minus, Plus} from "lucide-react";
+import { useLocation, useNavigate } from "react-router";
 
-function CartPage({cart}) {
+function CartPage() {
+
+  const location = useLocation();
+  const [cart, setCart] = React.useState(location.state?.cart || []);
+  const customerInfo = location.state?.customerInfo || {};
+ const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
     const updateQuantity = (id, delta) => {
     setCart(cart.map(item =>
@@ -13,11 +20,12 @@ function CartPage({cart}) {
     setCart(cart.filter(item => item.id !== id));
   };
 
+  const navigate = useNavigate();
+
   return (
     <>
       <div
         className="fixed inset-0 bg-black bg-opacity-50 z-20"
-        onClick={() => setIsCartOpen(false)}
       />
       <div className="fixed right-0 top-0 h-full w-full sm:w-full bg-white shadow-xl z-30 flex flex-col">
         <div className="flex items-center justify-between p-4 border-b">
@@ -78,7 +86,9 @@ function CartPage({cart}) {
               <span>Total:</span>
               <span>${total.toFixed(2)}</span>
             </div>
-            <button className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+            <button className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+            onClick={()=>navigate("/checkout",{state:{cart,customerInfo}})}
+            >
               Checkout
             </button>
           </div>
