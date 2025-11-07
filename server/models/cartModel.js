@@ -7,7 +7,8 @@ const cartSchema = new mongoose.Schema({
         quantity : Number
     }],
         default : []
-    }
+    },
+
 });
 
 const Cart = mongoose.model("Cart", cartSchema);

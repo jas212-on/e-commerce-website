@@ -1,45 +1,50 @@
 import React, { useEffect } from "react";
-import {X, Minus, Plus} from "lucide-react";
+import { X, Minus, Plus } from "lucide-react";
 import { useLocation, useNavigate } from "react-router";
-import {axiosInstance} from "../lib/axios";
+import { axiosInstance } from "../lib/axios";
 
 function CartPage() {
-
   const [cart, setCart] = React.useState([]);
- const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-    const updateQuantity = async (id, delta) => {
-    setCart(cart.map(item =>
-      item._id === id ? { ...item, quantity: Math.max(0, item.quantity + delta) } : item
-    ).filter(item => item.quantity > 0));
-    await axiosInstance.post('/add-to-cart', { productId: id, quantity: delta });
+  const updateQuantity = async (id, delta) => {
+    setCart(
+      cart
+        .map((item) =>
+          item._id === id
+            ? { ...item, quantity: Math.max(0, item.quantity + delta) }
+            : item
+        )
+        .filter((item) => item.quantity > 0)
+    );
+    await axiosInstance.post("/add-to-cart", {
+      productId: id,
+      quantity: delta,
+    });
   };
 
   const removeFromCart = async (id) => {
-    setCart(cart.filter(item => item._id !== id));
+    setCart(cart.filter((item) => item._id !== id));
     await axiosInstance.delete(`/cart/${id}`);
   };
 
-  useEffect(()=>{
+  useEffect(() => {
     const fetchCart = async () => {
       try {
-        const response = await axiosInstance.get('/cart');
-        console.log(response.data)
+        const response = await axiosInstance.get("/cart");
         setCart(response.data);
       } catch (error) {
         console.error(error);
       }
-    }
+    };
     fetchCart();
-  },[])
+  }, []);
 
   const navigate = useNavigate();
 
   return (
     <>
-      <div
-        className="fixed inset-0 bg-black bg-opacity-50 z-20"
-      />
+      <div className="fixed inset-0 bg-black bg-opacity-50 z-20" />
       <div className="fixed right-0 top-0 h-full w-full sm:w-full bg-white shadow-xl z-30 flex flex-col">
         <div className="flex items-center justify-between p-4 border-b">
           <h2 className="text-xl font-bold">Shopping Cart</h2>
@@ -99,8 +104,9 @@ function CartPage() {
               <span>Total:</span>
               <span>${total.toFixed(2)}</span>
             </div>
-            <button className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-            onClick={()=>navigate("/checkout",{state:{cart}})}
+            <button
+              className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+              onClick={() => navigate("/checkout", { state: { cart } })}
             >
               Checkout
             </button>
