@@ -3,17 +3,28 @@ import { useState } from 'react';
 import { useLocation } from "react-router";
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
+import { axiosInstance } from '../lib/axios';
 
 function CheckOutPage() {
 
-    const location = useLocation();
-    const [customerInfo, setCustomerInfo] = useState(location.state?.customerInfo || {});
+
+    const [customerInfo, setCustomerInfo] = useState( {name:"",email:""});
     const [cart, setCart] = React.useState(location.state?.cart || []);
     const navigate = useNavigate();
 
     const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const tax = subtotal * 0.08;
     const total = subtotal + tax;
+
+    const handlePlaceOrder = async ()=>{
+        try{
+          console.log("order placed")
+          await axiosInstance.post('/place/order')
+          navigate('/receipt',{state:{customerInfo,cart}})
+        }catch(error){
+            console.error(error);
+        }
+    }
   return (
     <div className="min-h-screen bg-gray-50">
         <header className="bg-white shadow-sm">
@@ -32,7 +43,7 @@ function CheckOutPage() {
             {/* Customer Information Form */}
             <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
               <h2 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6">Customer Information</h2>
-              <form  className="space-y-4">
+              <form  className="space-y-4" onSubmit={(e) => { e.preventDefault(); handlePlaceOrder(); }}>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Full Name *
@@ -60,7 +71,7 @@ function CheckOutPage() {
                   />
                 </div>
                 <button
-                  onClick={()=>navigate("/receipt",{state:{cart,customerInfo}})}
+                  onClick={handlePlaceOrder}
                   className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors mt-6"
                 >
                   Place Order
@@ -73,7 +84,7 @@ function CheckOutPage() {
               <h2 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6">Order Summary</h2>
               <div className="space-y-3 mb-6">
                 {cart.map(item => (
-                  <div key={item.id} className="flex justify-between text-sm">
+                  <div key={item._id} className="flex justify-between text-sm">
                     <span className="text-gray-700">
                       {item.name} x {item.quantity}
                     </span>

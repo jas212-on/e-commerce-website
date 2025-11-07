@@ -7,11 +7,12 @@ const HomePage = () => {
   const [cart, setCart] = useState([]);
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
+  const [userId, setUserId] = useState(null);
   const location = useLocation();
   const customerInfo = location.state?.customerInfo || {};
 
 
-  const addToCart = (product) => {
+  const addToCart = async (product) => {
     const existing = cart.find(item => item.id === product.id);
     if (existing) {
       setCart(cart.map(item =>
@@ -20,6 +21,8 @@ const HomePage = () => {
     } else {
       setCart([...cart, { ...product, quantity: 1 }]);
     }
+    await axiosInstance.post('/add-to-cart', { productId: product._id, quantity: 1 });
+
   };
 
   useEffect(() => {
@@ -43,7 +46,7 @@ const HomePage = () => {
       <header className="bg-white shadow-sm sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex items-center justify-between">
           <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">ShopHub</h1>
-          <div className='flex gap-8 w-30'>
+          <div className='flex gap-8 w-40'>
           <button
             onClick={() => navigate('/cart', { state: { cart,customerInfo } })}
             className="relative p-2 text-gray-700 hover:text-gray-900"
@@ -57,10 +60,9 @@ const HomePage = () => {
             )}
           </button>
           <button
-                onClick={() => navigate('/signin')}
                 className="text-sm text-gray-600 hover:text-gray-900 font-medium"
               >
-                Sign in
+                Hello, user
               </button>
               </div>
         </div>
@@ -70,7 +72,7 @@ const HomePage = () => {
         {/* Product Grid */}
         <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
           {products.map(product => (
-            <div key={product.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+            <div key={product._id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
               <img
                 src={product.image}
                 alt={product.name}

@@ -71,7 +71,7 @@ function ReceiptPage() {
             <h3 className="font-semibold text-gray-900 mb-4">Order Details</h3>
             <div className="space-y-3 mb-6">
               {cart.map(item => (
-                <div key={item.id} className="flex justify-between items-start">
+                <div key={item._id} className="flex justify-between items-start">
                   <div className="flex-1">
                     <p className="font-medium text-gray-900">{item.name}</p>
                     <p className="text-sm text-gray-600">

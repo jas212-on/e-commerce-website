@@ -4,6 +4,8 @@ import { connectDB } from "./lib/db.js"
 import cors from "cors"
 import { createServer } from "http"
 import Product from "./models/productModel.js"
+import Cart from "./models/cartModel.js"
+import mongoose from "mongoose"
 
 dotenv.config()
 
@@ -32,6 +34,91 @@ app.get('/products',async (req,res)=>{
     console.log("Error fetching products: ",error)
   }
 })
+
+
+app.post("/add-to-cart", async (req, res) => {
+  try {
+    const { productId, quantity } = req.body;
+    const cart = await Cart.findOne();
+
+    if (!cart) {
+      return res.status(404).json({ message: "No cart available " });
+    }
+
+    const existingProduct = cart.cart.find(item => item.productId === productId);
+
+    if (existingProduct) {
+      existingProduct.quantity += quantity;
+    } else {
+      cart.cart.push({ productId : productId, quantity: quantity });
+    }
+
+    await cart.save();
+
+    res.json({ message: "Cart updated successfully", cart: cart.cart });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/cart", async (req, res) => {
+  try {
+    const cart = await Cart.findOne();
+    if (!cart) return res.status(404).json({ message: "Cart not found" });
+
+    
+    const productIds = cart.cart.map(item => new mongoose.Types.ObjectId(item.productId));
+    const products = await Product.find({ _id: { $in: productIds } });
+
+    const cartWithDetails = cart.cart.map(cartItem => {
+      const product = products.find(p => p._id.toString() === cartItem.productId);
+      if (!product) return null;
+      return { ...product._doc, quantity: cartItem.quantity };
+    }).filter(item => item !== null);
+
+    res.json(cartWithDetails);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete("/cart/:productId", async (req, res) => {
+  try {
+    const { productId } = req.params;
+
+    const cart = await Cart.findOne();
+    if (!cart) return res.status(404).json({ message: "Cart not found" });
+
+    cart.cart = cart.cart.filter(item => item.productId !== productId);
+
+    await cart.save();
+
+    res.json({ message: "Product removed from cart", cart: cart.cart });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/place/order", async (req, res) => {
+  try {
+    const updatedCart = await Cart.findOneAndUpdate(
+      {},
+      { $set: { cart: [] } },
+      { new: true }
+    );
+    if (!updatedCart) return res.status(404).json({ message: "Cart not found" });
+
+
+    res.json({ message: "Cart emptied successfully", cart: cart.cart });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 httpServer.listen(PORT,()=>{
     console.log("Server starting at port "+PORT )

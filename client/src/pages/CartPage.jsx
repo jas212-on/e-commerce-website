@@ -1,24 +1,37 @@
-import React, { use } from "react";
+import React, { useEffect } from "react";
 import {X, Minus, Plus} from "lucide-react";
 import { useLocation, useNavigate } from "react-router";
+import {axiosInstance} from "../lib/axios";
 
 function CartPage() {
 
-  const location = useLocation();
-  const [cart, setCart] = React.useState(location.state?.cart || []);
-  const customerInfo = location.state?.customerInfo || {};
+  const [cart, setCart] = React.useState([]);
  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-    const updateQuantity = (id, delta) => {
+    const updateQuantity = async (id, delta) => {
     setCart(cart.map(item =>
-      item.id === id ? { ...item, quantity: Math.max(0, item.quantity + delta) } : item
+      item._id === id ? { ...item, quantity: Math.max(0, item.quantity + delta) } : item
     ).filter(item => item.quantity > 0));
+    await axiosInstance.post('/add-to-cart', { productId: id, quantity: delta });
   };
 
-  const removeFromCart = (id) => {
-    setCart(cart.filter(item => item.id !== id));
+  const removeFromCart = async (id) => {
+    setCart(cart.filter(item => item._id !== id));
+    await axiosInstance.delete(`/cart/${id}`);
   };
+
+  useEffect(()=>{
+    const fetchCart = async () => {
+      try {
+        const response = await axiosInstance.get('/cart');
+        console.log(response.data)
+        setCart(response.data);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    fetchCart();
+  },[])
 
   const navigate = useNavigate();
 
@@ -39,7 +52,7 @@ function CartPage() {
             <div className="space-y-4">
               {cart.map((item) => (
                 <div
-                  key={item.id}
+                  key={item._id}
                   className="flex gap-3 bg-gray-50 p-3 rounded-lg"
                 >
                   <img
@@ -52,7 +65,7 @@ function CartPage() {
                     <p className="text-gray-600 text-sm">${item.price}</p>
                     <div className="flex items-center gap-2 mt-2">
                       <button
-                        onClick={() => updateQuantity(item.id, -1)}
+                        onClick={() => updateQuantity(item._id, -1)}
                         className="p-1 bg-gray-200 rounded hover:bg-gray-300"
                       >
                         <Minus size={14} />
@@ -61,13 +74,13 @@ function CartPage() {
                         {item.quantity}
                       </span>
                       <button
-                        onClick={() => updateQuantity(item.id, 1)}
+                        onClick={() => updateQuantity(item._id, 1)}
                         className="p-1 bg-gray-200 rounded hover:bg-gray-300"
                       >
                         <Plus size={14} />
                       </button>
                       <button
-                        onClick={() => removeFromCart(item.id)}
+                        onClick={() => removeFromCart(item._id)}
                         className="ml-auto text-red-600 hover:text-red-800"
                       >
                         <X size={18} />
@@ -87,7 +100,7 @@ function CartPage() {
               <span>${total.toFixed(2)}</span>
             </div>
             <button className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-            onClick={()=>navigate("/checkout",{state:{cart,customerInfo}})}
+            onClick={()=>navigate("/checkout",{state:{cart}})}
             >
               Checkout
             </button>
