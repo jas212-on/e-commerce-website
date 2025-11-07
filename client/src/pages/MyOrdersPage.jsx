@@ -25,7 +25,7 @@ export function MyOrdersPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">
-              My Orders
+               My Orders
             </h1>
           </div>
         </div>
