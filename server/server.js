@@ -167,7 +167,7 @@ app.get("/orders/:id", async (req, res) => {
 
 app.get("/my-orders", async (req, res) => {
   try {
-    const orders = await Order.find();
+    const orders = await Order.find().sort({ date: -1 });
     res.json(orders);
   } catch (error) {
     console.log("Error fetching products: ", error);

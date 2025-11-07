@@ -27,6 +27,12 @@ function CheckOutPage() {
 
   const handlePlaceOrder = async () => {
     try {
+      if(customerInfo.name === '') {
+        return alert('Please enter your Name');
+      }
+      if(customerInfo.email === '') {
+        return alert('Please enter your Email');
+      }
       const orderInfo = {
         date: currentDate,
         customerName: customerInfo.name,
@@ -60,7 +66,7 @@ function CheckOutPage() {
             <h2 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6">
               Customer Information
             </h2>
-            <div className="space-y-4">
+            <form onClick={(e)=>e.preventDefault()} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Full Name *
@@ -97,7 +103,7 @@ function CheckOutPage() {
               >
                 Place Order
               </button>
-            </div>
+            </form>
           </div>
 
           {/* Order Summary */}

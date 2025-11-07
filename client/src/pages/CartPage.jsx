@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { X, Minus, Plus } from "lucide-react";
+import { Minus, Plus, Trash } from "lucide-react";
 import { useLocation, useNavigate } from "react-router";
 import { axiosInstance } from "../lib/axios";
 
@@ -88,7 +88,7 @@ function CartPage() {
                         onClick={() => removeFromCart(item._id)}
                         className="ml-auto text-red-600 hover:text-red-800"
                       >
-                        <X size={18} />
+                        <Trash size={18} />
                       </button>
                     </div>
                   </div>
